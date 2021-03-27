@@ -9,10 +9,12 @@ const db = require('./models')
 const Todo = db.Todo
 const User = db.User
 
+// 寫在 express-session 之後
+const usePassport = require('./config/passport')
+const passport = require('passport')
+
 const app = express()
 const PORT = 3000
-
-
 
 app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }))
 app.set('view engine', 'hbs')
@@ -25,6 +27,8 @@ app.use(session({
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
+
+usePassport(app)
 
 // 設定路由
 // 首頁路由
@@ -44,9 +48,10 @@ app.get('/users/login', (req, res) => {
 })
 
 // 登入 submit
-app.post('/users/login', (req, res) => {
-  res.send('login')
-})
+app.post('/users/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/users/login'
+}))
 
 // 註冊畫面路由
 app.get('/users/register', (req, res) => {
